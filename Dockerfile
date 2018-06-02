@@ -6,5 +6,4 @@ COPY . /home/app
 WORKDIR /home/app
 
 RUN npm install
-
 CMD ./scripts/start.sh

@@ -68,3 +68,6 @@ typings/
 
 # build pipeline directories
 dist/
+
+# sensitive docker info
+docker-compose.override.yml
