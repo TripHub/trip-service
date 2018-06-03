@@ -6,4 +6,4 @@ COPY . /home/app
 WORKDIR /home/app
 
 RUN npm install
-CMD ./scripts/start.sh
+CMD npm run migrate && ./scripts/start.sh
