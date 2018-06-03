@@ -8,6 +8,9 @@ exports.up = function (knex, Promise) {
     // table.jsonb('owners').notNullable()
     // table.jsonb('members').notNullable()
     // table.timestamps(false, true)
+
+    // table.unique(['pid'])
+    // table.index(['pid'])
   })
 }
 
