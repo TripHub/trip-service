@@ -8,7 +8,7 @@ const PORT = process.env.PORT
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
-app.use('/', routes)
+app.use('/v1', routes)
 
 // start accepting requests
 app.listen(PORT, (err) => {
