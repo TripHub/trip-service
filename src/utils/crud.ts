@@ -1,18 +1,15 @@
+import { Model } from 'objection'
 import { Request, Response, Router } from 'express'
-const bookshelf = require('../db')
+import { wrapAsync } from './async'
 
 /**
  * Get all resources.
  */
 export const list = (router: Router) => (model) => {
-  router.get('/', (req: Request, res: Response) => {
-    model.fetchAll()
-      .then(result => res.json(result))
-      .catch(error => {
-        console.error(error)
-        res.json({ error })
-      })
-  })
+  router.get('/', wrapAsync(async (req: Request, res: Response) => {
+    const items = await model.query()
+    return res.json(items)
+  }))
 }
 
 /**
@@ -20,12 +17,14 @@ export const list = (router: Router) => (model) => {
  * URL param :id should be the id of the resource to retrieve.
  */
 export const retrieve = (router: Router) => (model) => {
-  router.get('/:id', (req: Request, res: Response) => {
+  router.get('/:id', wrapAsync(async (req: Request, res: Response) => {
+    // get id from path params
     const { id } = req.params
-    model.where({ id }).fetch({ require: true })
-      .then(instance => res.json(instance))
-      .catch(() => res.sendStatus(404))
-  })
+    // query for instance
+    const instance = await model.query().findById(id)
+    // return instance details
+    return res.json(instance)
+  }))
 }
 
 /**
@@ -33,29 +32,31 @@ export const retrieve = (router: Router) => (model) => {
  * Data must be provided in the body.
  */
 export const create = (router: Router) => (model) => {
-  router.post('/', (req: Request, res: Response) => {
-    new model(req.body).save(null, { method: 'insert' })
-      .then(result => res.status(201).json(result))
-      .catch(error => res.status(400).json({ error }))
-  })
+  router.post('/', wrapAsync(async (req: Request, res: Response) => {
+    // attempt to insert into database
+    const instance = await model.query().insert(req.body)
+    // return successfully saved model
+    return res.status(201).json(instance)
+  }))
 }
 
+/**
+ * Updates a resource.
+ * URL param :id should be the id of the resource to update.
+ */
 export const update = (router: Router) => (model) => {
-  router.put('/:id', (req: Request, res: Response) => {
+  router.patch('/:id', wrapAsync(async (req: Request, res: Response) => {
+    // get id from path params
     const { id } = req.params
-    // get the current data
-    model.where({ id }).fetch({ require: true })
-      .then((instance) => {
-        instance.save(req.body, {
-          method: 'update',
-          patch: true,
-          require: true
-        })
-          .then(result => res.json(result))
-          .catch(error => res.status(500).json({ error }))
-      })
-      .catch(() => res.sendStatus(404))
-  })
+    // get the instance
+    const instance = await model
+      .query()
+      .findById(id)
+      .patch(req.body)
+      .returning('*')
+    // return the sucessfully patched instance
+    return res.json(instance)
+  }))
 }
 
 /**
@@ -65,14 +66,16 @@ export const update = (router: Router) => (model) => {
  * in JavaScript.
  */
 export const remove = (router: Router) => (model) => {
-  router.delete('/:id', (req: Request, res: Response) => {
+  router.delete('/:id', wrapAsync(async (req: Request, res: Response) => {
+    // get the id from path params
     const { id } = req.params
-    model.forge({ id }).fetch({ require: true })
-      .then((instance) => {
-        instance.destroy()
-          .then(() => res.sendStatus(204))
-          .catch(error => res.status(500).json({ error }))
-      })
-      .catch(error => res.sendStatus(404))
-  })
+    // attempt to delete the requested instance
+    const instance = await model
+      .query()
+      .deleteById(id)
+      .returning('*')
+      .throwIfNotFound()
+    // return the deleted instance
+    return res.json(instance[0])
+  }))
 }

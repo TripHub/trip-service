@@ -1,9 +1,9 @@
 FROM node:alpine
 
-EXPOSE 3000 9229
+EXPOSE 3000
 
-COPY . /home/app
 WORKDIR /home/app
+COPY . /home/app
 
 RUN npm install
 CMD npm run migrate && ./scripts/start.sh

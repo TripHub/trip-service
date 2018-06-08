@@ -1,41 +1,42 @@
-const checkit = require('checkit')
-import { setPid } from '../utils/model'
-import bookshelf from '../db'
+import { Model, snakeCaseMappers } from 'objection'
+import { PidTimestampModel } from '../utils/model'
 
-const Trip = bookshelf.Model.extend({
-  tableName: 'trip',
-  hasTimestamps: true,
-  /**
-   * Actions to perform upon creation.
-   */
-  initialize: function () {
-    this.constructor.__super__.initialize.apply(this, arguments)
-    this.on('saving', setPid)
-  },
-  /**
-   * A trip contains an array of starting locations.
-   */
-  locations: function () {
-    return this.hasMany('Location')
-  },
-  /**
-   * A trip contains an array of members.
-   */
-  members: function () {
-    return this.hasMany('Member')
-  },
-  /**
-   * Change db data before loading to model.
-   */
-  parse: (res) => {
-    return res
-  },
-  /**
-   * Change model data before persisting to db.
-   */
-  format: (res) => {
-    return res
+export default class Trip extends PidTimestampModel {
+  static tableName = 'trips'
+  static get modelPaths () {
+    return [__dirname]
   }
-})
+  static columnNameMappers = snakeCaseMappers()
 
-export default bookshelf.model('Trip', Trip)
+  static get relationMappings () {
+    return {
+      locations: {
+        relation: Model.HasManyRelation,
+        modelClass: 'location',
+        join: {
+          from: 'trips.id',
+          to: 'locations.trip_id'
+        }
+      },
+      members: {
+        relation: Model.HasManyRelation,
+        modelClass: 'trip_member',
+        join: {
+          from: 'trips.id',
+          to: 'trips_members.trip_id'
+        }
+      }
+    }
+  }
+
+  static jsonSchema = {
+    type: 'object',
+    required: ['title'],
+    properties: {
+      id: { type: 'integer' },
+      pid: { type: 'string' },
+      title: { type: 'string', minLength: 1, maxLength: 255 },
+      description: { type: 'string' },
+    }
+  }
+}
