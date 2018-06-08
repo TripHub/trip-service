@@ -2,8 +2,9 @@ FROM node:alpine
 
 EXPOSE 3000
 
-WORKDIR /home/app
-COPY . /home/app
+WORKDIR /usr/src/app
+COPY . .
 
 RUN npm install
+
 CMD npm run migrate && ./scripts/start.sh
