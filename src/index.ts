@@ -6,7 +6,7 @@ import { hasAccessToken } from './utils/request/auth'
 import routes from './routes'
 
 const app = express()
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 3000
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
@@ -23,8 +23,8 @@ app.listen(PORT, (err) => {
     console.error('a server error occurred', err)
     process.exit(1)
   }
-  // setup the database orm
-  require('./db')
+  // setup conenction to database
+  require('.utils/db')
   // good to go!
   console.log(`started at http://localhost:${PORT}`)
 })
