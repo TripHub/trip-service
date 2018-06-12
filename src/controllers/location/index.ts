@@ -99,9 +99,14 @@ export const removeNextLocation = wrapAsync(async (req: Request, res: Response) 
   // target location is specified in the params
   const { target, next } = req.params
   // attempt to get target location
-  const targetLocation = await Location.query().findById(target)
+  const targetLocation = await Location
+    .query()
+    .findById(target)
+    .throwIfNotFound()
   // check next location exists
-  const nextLocation = await Location.query().findById(next)
+  await Location.query()
+    .findById(next)
+    .throwIfNotFound()
   // delete next location
   await targetLocation
     .$relatedQuery('next')
