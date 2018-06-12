@@ -5,6 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express'
 import { wrapAsync } from '../../utils/async'
+import { dbErrors } from '../../utils/db/errorCodes'
 import Trip from '../../models/trip'
 import Location from '../../models/location'
 
@@ -72,13 +73,20 @@ export const addNextLocation = wrapAsync(async (req: Request, res: Response) => 
     .findById(next)
     .throwIfNotFound()
   // save to database
-  await targetLocation
-    .$relatedQuery('next')
-    .insert({
-      // @ts-ignore
-      next: parseInt(next),
-      location_id: parseInt(target)
-    })
+  try {
+    await targetLocation
+      .$relatedQuery('next')
+      .insert({
+        // @ts-ignore
+        next: parseInt(next),
+        location_id: parseInt(target)
+      })
+  } catch (e) {
+    // ignore error if its a unique violation (next location already exists)
+    if (e.code !== dbErrors.UNIQUE) {
+      throw (e)
+    }
+  }
   return res.sendStatus(204)
 })
 
