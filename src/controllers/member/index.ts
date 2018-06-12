@@ -46,6 +46,7 @@ export const createMember = wrapAsync(async (req: Request, res: Response, next: 
       ...req.body,
       trip_id: parseInt(id, 10)
     })
+    .returning('*')
   // return successfully created instance
   return res.json(member)
 })

@@ -9,7 +9,6 @@ export default class Location extends PidTimestampModel {
   static columnNameMappers = snakeCaseMappers()
 
   static get relationMappings () {
-
     return {
       next: {
         relation: Model.HasManyRelation,

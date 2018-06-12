@@ -21,7 +21,10 @@ export const retrieve = (router: Router) => (model) => {
     // get id from path params
     const { id } = req.params
     // query for instance
-    const instance = await model.query().findById(id)
+    const instance = await model
+      .query()
+      .findById(id)
+      .throwIfNotFound()
     // return instance details
     return res.json(instance)
   }))
@@ -34,7 +37,9 @@ export const retrieve = (router: Router) => (model) => {
 export const create = (router: Router) => (model) => {
   router.post('/', wrapAsync(async (req: Request, res: Response) => {
     // attempt to insert into database
-    const instance = await model.query().insert(req.body)
+    const instance = await model
+      .query()
+      .insert(req.body)
     // return successfully saved model
     return res.status(201).json(instance)
   }))
@@ -54,6 +59,7 @@ export const update = (router: Router) => (model) => {
       .findById(id)
       .patch(req.body)
       .returning('*')
+      .throwIfNotFound()
     // return the sucessfully patched instance
     return res.json(instance)
   }))

@@ -1,8 +1,11 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-import { NotFoundError, ValidationError } from 'objection'
-import errorHandlers from './utils/middleware/error'
-import { hasAccessToken } from './utils/request/auth'
+import {
+  handleNotFoundError,
+  handleValidationError,
+  handleUnknownError,
+} from './utils/middleware/error'
+// import { hasAccessToken } from './utils/request/auth'
 import routes from './routes'
 
 const app = express()
@@ -15,7 +18,9 @@ app.use(bodyParser.json())
 // app.use(hasAccessToken)
 // versioned endpoints
 app.use('/v1', routes)
-app.use(errorHandlers)
+app.use(handleNotFoundError)
+app.use(handleValidationError)
+app.use(handleValidationError)
 
 // start accepting requests
 app.listen(PORT, (err) => {
@@ -24,7 +29,7 @@ app.listen(PORT, (err) => {
     process.exit(1)
   }
   // setup conenction to database
-  require('.utils/db')
+  require('./utils/db')
   // good to go!
   console.log(`started at http://localhost:${PORT}`)
 })

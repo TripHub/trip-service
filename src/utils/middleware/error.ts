@@ -1,7 +1,6 @@
-import { Response, Request, NextFunction } from 'express'
 import { NotFoundError, ValidationError } from 'objection'
 
-const handleNotFoundError = (error, req, res, next) => {
+export const handleNotFoundError = (error, req, res, next) => {
   if (error instanceof NotFoundError) {
     return res.status(404).json({
       type: 'Not found',
@@ -11,7 +10,7 @@ const handleNotFoundError = (error, req, res, next) => {
   next(error)
 }
 
-const handleValidationError = (error, req, res, next) => {
+export const handleValidationError = (error, req, res, next) => {
   if (error instanceof ValidationError) {
     return res.status(400).json({
       type: 'Validation error',
@@ -21,15 +20,9 @@ const handleValidationError = (error, req, res, next) => {
   next(error)
 }
 
-const handleUnknownError = (error, req, res, next) => {
+export const handleUnknownError = (error, req, res, next) => {
   return res.status(500).json({
     type: error.type || 'Unknown error',
     message: 'An unknown error occurred, please try again later'
   })
-}
-
-export default (error, req: Request, res: Response, next: NextFunction) => {
-  handleNotFoundError(error, req, res, next)
-  handleValidationError(error, req, res, next)
-  handleUnknownError(error, res, req, next)
 }

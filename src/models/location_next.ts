@@ -2,8 +2,8 @@ import { Model, snakeCaseMappers } from 'objection'
 
 export default class LocationNext extends Model {
   static tableName = 'locations_next'
-  static idColumn = ['locationId', 'next']
-  static columnNameMappers = snakeCaseMappers()
+  static idColumn = ['location_id', 'next']
+  // static columnNameMappers = snakeCaseMappers()
 
   static jsonSchema = {
     type: 'object',

@@ -7,7 +7,6 @@ import { Request, Response, NextFunction } from 'express'
 import { wrapAsync } from '../../utils/async'
 import Trip from '../../models/trip'
 import Location from '../../models/location'
-import LocationNext from '../../models/location_next'
 
 /**
  * List all locations for a trip.
@@ -17,11 +16,11 @@ export const getLocations = wrapAsync(async (req: Request, res: Response) => {
   // get id from the url
   const { id } = req.params
   // get the trip model
-  const instance = await Trip
+  const trip = await Trip
     .query()
     .findById(id)
   // get locations for trip instance
-  const locations = await instance.$relatedQuery('locations')
+  const locations = await trip.$relatedQuery('locations')
   // return locations
   return res.json(locations)
 })
@@ -35,23 +34,21 @@ export const getLocations = wrapAsync(async (req: Request, res: Response) => {
 export const createLocation = wrapAsync(async (req: Request, res: Response, next: NextFunction) => {
   // get the trip id
   const { id } = req.params
-  // get the trip
+  // check the trip exists
   const trip = await Trip
     .query()
     .findById(id)
     .throwIfNotFound()
-  // attempt to create location
-  try {
-    const location = await Location
-      .query()
-      .insert({
-        ...req.body,
-        trip_id: parseInt(id, 10)
-      })
-    return res.json(location)
-  } catch (error) {
-    next(error)
-  }
+  // create location for trip
+  const location = await Location
+    .query()
+    .insert({
+      ...req.body,
+      trip_id: parseInt(id, 10)
+    })
+    .returning('*')
+
+  return res.json(location)
 })
 
 /**
@@ -65,22 +62,28 @@ export const addNextLocation = wrapAsync(async (req: Request, res: Response) => 
   // target location is specified in the params
   const { target, next } = req.params
   // attempt to get target location
-  const targetLocation = await Location.query().findById(target)
+  const targetLocation = await Location
+    .query()
+    .findById(target)
+    .throwIfNotFound()
   // check next location exist
-  const nextLocation = await Location.query().findById(next)
+  const nextLocation = await Location
+    .query()
+    .findById(next)
+    .throwIfNotFound()
   // save to database
-  console.log('will add...')
+  await targetLocation
+    .$relatedQuery('next')
+    .insert({
+      // @ts-ignore
+      next: parseInt(next),
+      location_id: parseInt(target)
+    })
   return res.sendStatus(204)
-  // const location = await LocationNext
-  //   .query()
-  //   .insert({
-  //     locationId: target,
-  //     next
-  //   })
 })
 
 /**
- * Remve a location from the set of next locations.
+ * Remove a location from the set of next locations.
  * @param req 
  * @param res 
  */
@@ -91,10 +94,30 @@ export const removeNextLocation = wrapAsync(async (req: Request, res: Response) 
   const targetLocation = await Location.query().findById(target)
   // check next location exists
   const nextLocation = await Location.query().findById(next)
-  // save to database
-  const instance = await LocationNext
-    .query()
-    .deleteById([target, next])
-    .returning('*')
-  return res.json(instance)
+  // delete next location
+  await targetLocation
+    .$relatedQuery('next')
+    .deleteById([ parseInt(target), parseInt(next) ])
+  return res.sendStatus(204)
+})
+
+/**
+ * Get the list of next locations for a location.
+ * Request path should contain an `id` param for the location ID to get next
+ * locations for.
+ * @param req
+ * @param res 
+ */
+export const getNextLocations = wrapAsync(async (req: Request, res: Response) => {
+  // get location id to get next locations for
+  const { id } = req.params
+  // check location exists
+  const location = await Location.query()
+    .findById(id)
+    .throwIfNotFound()
+  // get next locations for location
+  const nextLocations = await location
+    .$relatedQuery('next')
+  // return list
+  return res.json(nextLocations)
 })
