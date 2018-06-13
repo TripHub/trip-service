@@ -1,16 +1,25 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const cors = require('cors')
+
 import {
   handleNotFoundError,
   handleValidationError,
   handleUnknownError,
 } from './utils/middleware/error'
-// import { hasAccessToken } from './utils/request/auth'
+import { hasAccessToken } from './utils/request/auth'
 import routes from './routes'
 
 const app = express()
 const PORT = process.env.PORT || 3000
 
+// enable cors
+app.use(cors())
+
+// parse JWT in Authorization header
+app.use(hasAccessToken)
+
+// install middleware
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
@@ -18,6 +27,8 @@ app.use(bodyParser.json())
 // app.use(hasAccessToken)
 // versioned endpoints
 app.use('/v1', routes)
+
+// error handlers
 app.use(handleNotFoundError)
 app.use(handleValidationError)
 app.use(handleValidationError)
