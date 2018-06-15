@@ -1,9 +1,8 @@
-import { Model, snakeCaseMappers } from 'objection'
+import { Model } from 'objection'
 
 export default class LocationMember extends Model {
   static tableName = 'locations_members'
   static idColumn = ['locationId', 'userId']
-  static columnNameMappers = snakeCaseMappers()
 
   static jsonSchema = {
     type: 'object',

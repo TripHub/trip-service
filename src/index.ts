@@ -17,7 +17,9 @@ const PORT = process.env.PORT || 3000
 app.use(cors())
 
 // parse JWT in Authorization header
-app.use(hasAccessToken)
+// if (process.env.NODE_ENV === 'production') {
+  app.use(hasAccessToken)
+// }
 
 // install middleware
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -42,5 +44,5 @@ app.listen(PORT, (err) => {
   // setup conenction to database
   require('./utils/db')
   // good to go!
-  console.log(`started at http://localhost:${PORT}`)
+  console.log('trip service listening')
 })

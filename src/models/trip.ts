@@ -1,4 +1,4 @@
-import { Model, snakeCaseMappers } from 'objection'
+import { Model } from 'objection'
 import { PidTimestampModel } from '../utils/model'
 
 export default class Trip extends PidTimestampModel {
@@ -6,7 +6,6 @@ export default class Trip extends PidTimestampModel {
   static get modelPaths () {
     return [__dirname]
   }
-  static columnNameMappers = snakeCaseMappers()
 
   static get relationMappings () {
     return {
