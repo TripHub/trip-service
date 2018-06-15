@@ -27,7 +27,11 @@ export default class TripMember extends TimestampModel {
     properties: {
       trip_id: { type: 'number' },
       user_id: { type: 'string' },
-      role: { type: 'string' }
+      role: {
+        type: 'string',
+        enum: ['admin', 'member'],
+        default: 'member'
+      }
     }
   }
 }

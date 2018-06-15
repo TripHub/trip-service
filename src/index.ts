@@ -17,9 +17,7 @@ const PORT = process.env.PORT || 3000
 app.use(cors())
 
 // parse JWT in Authorization header
-// if (process.env.NODE_ENV === 'production') {
-  app.use(hasAccessToken)
-// }
+app.use(hasAccessToken)
 
 // install middleware
 app.use(bodyParser.urlencoded({ extended: true }))

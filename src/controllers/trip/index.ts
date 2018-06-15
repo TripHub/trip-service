@@ -7,6 +7,25 @@ import { wrapAsync } from '../../utils/async'
 import Trip from '../../models/trip'
 
 /**
+ * 
+ * @param userId 
+ */
+const getUserTrips = userId => {
+  return Trip
+    .query()
+    .joinRelation('members')
+    .where('members.user_id', userId)
+}
+
+/**
+ * List all trips a user is a member of.
+ */
+export const list = wrapAsync(async (req: Request, res: Response) => {
+  return res.json(
+    await getUserTrips(req.user.sub))
+})
+
+/**
  * Gets a single trip based on id and returns it along with basic details on
  * locations and members.
  * @param req 
@@ -16,8 +35,7 @@ export const retrieve = wrapAsync(async (req: Request, res: Response) => {
   // get id from path params
   const { id } = req.params
   // query for instance
-  const instance = await Trip
-    .query()
+  const instance = await getUserTrips(req.user.sub)
     .findById(id)
     .eager('[locations, members]')
     .throwIfNotFound()
