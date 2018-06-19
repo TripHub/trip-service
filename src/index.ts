@@ -17,14 +17,14 @@ const PORT = process.env.PORT || 3000
 app.use(cors())
 
 // parse JWT in Authorization header
-app.use(hasAccessToken)
+// app.use(hasAccessToken)
 
 // install middleware
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
 // all routes require authorisation
-// app.use(hasAccessToken)
+app.use(hasAccessToken)
 // versioned endpoints
 app.use('/v1', routes)
 
