@@ -19,6 +19,10 @@ import { wrapAsync } from '../../utils/async'
 export const placeSearch = wrapAsync(async (req: Request, res: Response) => {
     // get term from query string
     const { query, fields = 'formatted_address' } = req.query
+    // basic validation
+    if (!query) {
+        return res.status(400).json({ message: 'query is required' })
+    }
     // build google url
     const endpoint = new URL(
         'https://maps.googleapis.com/maps/api/place/findplacefromtext/json')

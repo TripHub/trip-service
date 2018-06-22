@@ -10,24 +10,26 @@ exports.up = function (knex, Promise) {
     // table.string('picture', 511).nullable()
     table.timestamps(true)
   })
+
   /**
    * Trip Members table.
    */
   .createTable('trips_members', function (table) {
-    table.integer('trip_id').references('trips.id').notNullable()
+    table.integer('trip_id').references('trips.id').onDelete('CASCADE').notNullable()
     table.string('user_id').notNullable()
     table.enu('role', ['admin', 'member']).notNullable().defaultTo('member')
 
     table.primary(['trip_id', 'user_id'])
     table.timestamps(true)
   })
+
   /**
    * Locations table.
    */
   .createTable('locations', function (table) {
     table.increments('id').unsigned().primary()
     table.string('pid', 11).unique().notNullable()
-    table.integer('trip_id').references('trips.id').notNullable()
+    table.integer('trip_id').references('trips.id').onDelete('CASCADE').notNullable()
     table.string('title').notNullable()
     // table.string('picture', 511)
     table.float('lat', 9, 3).notNullable()
@@ -37,22 +39,24 @@ exports.up = function (knex, Promise) {
     table.datetime('depart')
     table.timestamps(true)
   })
+
   /**
    * Location Members table.
    */
   .createTable('locations_members', function (table) {
-    table.integer('location_id').references('locations.id').notNullable()
+    table.integer('location_id').references('locations.id').onDelete('CASCADE').notNullable()
     table.string('user_id').notNullable()
 
     table.primary(['location_id', 'user_id'])
   })
+
   /**
    * Location Next table.
    * Stores the next location(s) for a given location.
    */
   .createTable('locations_next', function (table) {
-    table.integer('location_id').references('locations.id')
-    table.integer('next').references('locations.id')
+    table.integer('location_id').references('locations.id').onDelete('CASCADE')
+    table.integer('next').references('locations.id').onDelete('CASCADE')
 
     table.primary(['location_id', 'next'])
   })
