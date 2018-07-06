@@ -4,6 +4,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express'
+
 import { wrapAsync } from '../../utils/async'
 import { dbErrors } from '../../utils/db/errorCodes'
 import Trip from '../../models/trip'
@@ -62,6 +63,8 @@ export const createLocation = wrapAsync(async (req: Request, res: Response, next
 export const addNextLocation = wrapAsync(async (req: Request, res: Response) => {
   // target location is specified in the params
   const { target, next } = req.params
+  // user id from req
+  const { sub } = req.user
   // attempt to get target location
   const targetLocation = await Location
     .query()
@@ -75,11 +78,12 @@ export const addNextLocation = wrapAsync(async (req: Request, res: Response) => 
   // save to database
   try {
     await targetLocation
-      .$relatedQuery('next')
+      .$relatedQuery('members')
       .insert({
         // @ts-ignore
         next: parseInt(next),
-        location_id: parseInt(target)
+        location_id: parseInt(target),
+        user_id: sub,
       })
   } catch (e) {
     // ignore error if its a unique violation (next location already exists)
@@ -109,7 +113,7 @@ export const removeNextLocation = wrapAsync(async (req: Request, res: Response) 
     .throwIfNotFound()
   // delete next location
   await targetLocation
-    .$relatedQuery('next')
+    .$relatedQuery('members')
     .deleteById([ parseInt(target), parseInt(next) ])
   return res.sendStatus(204)
 })
@@ -130,7 +134,7 @@ export const getNextLocations = wrapAsync(async (req: Request, res: Response) =>
     .throwIfNotFound()
   // get next locations for location
   const nextLocations = await location
-    .$relatedQuery('next')
+    .$relatedQuery('members')
   // return list
   return res.json(nextLocations)
 })
