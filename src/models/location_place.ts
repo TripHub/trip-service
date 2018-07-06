@@ -1,9 +1,9 @@
 import { Model } from 'objection'
 
-import { PidTimestampModel } from '../utils/model'
+import { TimestampModel } from '../utils/model'
 
-export default class Location extends PidTimestampModel {
-  static tableName = 'locations'
+export default class LocationPlace extends TimestampModel {
+  static tableName = 'locations_places'
 
   static get modelPaths () {
     return [__dirname]
@@ -11,20 +11,12 @@ export default class Location extends PidTimestampModel {
   
   static get relationMappings () {
     return {
-      trip: {
+      location: {
         relation: Model.BelongsToOneRelation,
-        modelClass: 'trip',
+        modelClass: 'location',
         join: {
-          from: 'locations.trip_id',
-          to: 'trips.id'
-        }
-      },
-      members: {
-        relation: Model.HasManyRelation,
-        modelClass: 'location_next',
-        join: {
-          from: 'locations.id',
-          to: 'locations_next.location_id'
+          from: 'locations_places.location_id',
+          to: 'locations.id'
         }
       },
     }
@@ -35,7 +27,6 @@ export default class Location extends PidTimestampModel {
     required: ['title', 'lat', 'lng'],
     properties: {
       id: { type: 'integer' },
-      pid: { type: 'string' },
       title: { type: 'string', minLength: 1, maxLength: 255 },
       lat: { type: 'number', minimum: -90, maximum: 90 },
       lng: { type: 'number', minimum: -180, maximum: 180 },

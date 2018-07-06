@@ -21,8 +21,8 @@ const getUserTrips = userId => {
  * List all trips a user is a member of.
  */
 export const list = wrapAsync(async (req: Request, res: Response) => {
-  return res.json(
-    await getUserTrips(req.user.sub))
+  const trips = await getUserTrips(req.user.sub)
+  return res.json(trips)
 })
 
 /**
