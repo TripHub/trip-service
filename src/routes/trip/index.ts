@@ -1,7 +1,8 @@
-import { Request, Response, Router } from 'express'
+import { Router } from 'express'
 import { getLocations, createLocation } from '../../controllers/location'
 import { getMembers, createMember } from '../../controllers/member'
 import { list, retrieve, create } from '../../controllers/trip'
+import { listInvitations, createInvitation } from '../../controllers/invitation'
 import { update, remove } from '../../utils/crud'
 import Trip from '../../models/trip'
 
@@ -24,5 +25,9 @@ router.post('/:id/locations', createLocation)
 router.get('/:id/members', getMembers)
 // create trip member
 router.post('/:id/members', createMember)
+// list trip invitation
+router.get('/:id/invitations', listInvitations)
+// create trip invitation
+router.post('/:id/invitations', createInvitation)
 
 export default router

@@ -1,4 +1,5 @@
 const randomstring = require('randomstring')
+const moment = require('moment')
 import { Model } from 'objection'
 
 /**
@@ -8,7 +9,8 @@ export class PidModel extends Model {
   /**
    * Set the PID on create
    */
-  $beforeInsert () {
+  async $beforeInsert (queryContext) {
+    await super.$beforeInsert(queryContext)
     // @ts-ignore
     this.pid = randomstring.generate(11)  
   }
@@ -18,16 +20,18 @@ export class PidModel extends Model {
  * Updates the timestamps on insert and update.
  */
 export class TimestampModel extends Model {
-  $beforeInsert () {
+  async $beforeInsert (queryContext) {
+    await super.$beforeInsert(queryContext)
     // @ts-ignore
-    this.created_at = new Date().toISOString()
+    this.created_at = moment.utc().toISOString()
     // @ts-ignore
-    this.updated_at = new Date().toISOString()
+    this.updated_at = moment.utc().toISOString()
   }
 
-  $beforeUpdate () {
+  async $beforeUpdate (opt, queryContext) {
+    await super.$beforeUpdate(opt, queryContext)
     // @ts-ignore
-    this.updated_at = new Date().toISOString()
+    this.updated_at = moment.utc().toISOString()
   }
 }
 
@@ -39,13 +43,14 @@ export class PidTimestampModel extends Model {
     // @ts-ignore
     this.pid = randomstring.generate(11)
     // @ts-ignore
-    this.created_at = new Date().toISOString()
+    this.created_at = moment.utc().toISOString()
     // @ts-ignore
-    this.updated_at = new Date().toISOString()
+    this.updated_at = moment.utc().toISOString()
   }
 
-  $beforeUpdate () {
+  async $beforeUpdate (queryContext) {
+    await super.$beforeInsert(queryContext)
     // @ts-ignore
-    this.updated_at = new Date().toISOString()
+    this.updated_at = moment.utc().toISOString()
   }
 }

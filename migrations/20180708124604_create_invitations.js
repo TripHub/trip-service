@@ -11,8 +11,8 @@ exports.up = function (knex, Promise) {
     table.string('id', 32).primary().notNullable()
     table.integer('trip_id').unsigned().notNullable()
     table.bool('is_active').defaultTo(true).notNullable()
-    table.string('invited_by').notNullable()
-    table.timestamp('expires_on').nullable()
+    table.string('created_by').notNullable()
+    table.timestamp('expires_at').nullable()
     table.timestamps(true)
     // relations
     table.foreign('trip_id')

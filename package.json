@@ -41,6 +41,7 @@
     "express-jwt": "^5.3.1",
     "jwks-rsa": "^1.2.1",
     "knex": "^0.14.6",
+    "moment": "^2.22.2",
     "objection": "^1.1.10",
     "pg": "^7.4.3",
     "randomstring": "^1.1.5"
