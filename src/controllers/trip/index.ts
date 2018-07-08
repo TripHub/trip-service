@@ -4,25 +4,15 @@
 
 import { Request, Response, NextFunction } from 'express'
 import { wrapAsync } from '../../utils/async'
+import { getUserTrips } from '../../utils/model/trips'
 import Trip from '../../models/trip'
-
-/**
- * 
- * @param userId 
- */
-const getUserTrips = userId => {
-  return Trip
-    .query()
-    .joinRelation('members')
-    .where('members.user_id', userId)
-}
 
 /**
  * List all trips a user is a member of.
  */
 export const list = wrapAsync(async (req: Request, res: Response) => {
-  return res.json(
-    await getUserTrips(req.user.sub))
+  const trips = await getUserTrips(req.user.sub)
+  return res.json(trips)
 })
 
 /**

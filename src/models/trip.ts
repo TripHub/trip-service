@@ -1,4 +1,5 @@
 import { Model } from 'objection'
+
 import { PidTimestampModel } from '../utils/model'
 
 export default class Trip extends PidTimestampModel {
