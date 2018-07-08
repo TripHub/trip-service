@@ -3,23 +3,24 @@
  * https://triphub.gitbook.io/database/locations/db.locations
  */
 
-export const TABLE_NAME = 'locations'
+const TABLE_NAME = 'locations'
 
 exports.up = function (knex, Promise) {
   return knex.schema.createTable(TABLE_NAME, function (table) {
-    table.increments('id').unsigned().notNullable().primary()
+    // fields
+    table.increments('id').unsigned().primary().notNullable()
     table.string('pid', 11).unique().notNullable()
-    table
-      .integer('trip_id')
-      .references('trips.id')
-      .onDelete('CASCADE')
-      .notNullable()
+    table.integer('trip_id').unsigned().notNullable()
     table.string('title').notNullable()
     // table.string('picture', 511)
     table.float('lat', 9, 3).notNullable()
     table.float('lng', 9, 3).notNullable()
-    table.string('google_place_id')
+    table.string('google_place_id').nullable()
     table.timestamps(true)
+    // relations
+    table.foreign('trip_id')
+      .references('trips.id')
+      .onDelete('CASCADE')
   })
 }
 
