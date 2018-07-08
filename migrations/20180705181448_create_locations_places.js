@@ -3,11 +3,11 @@
  * https://triphub.gitbook.io/database/locations/db.locations_places
  */
 
-const TABLE_NAME = 'locations_places'
+export const TABLE_NAME = 'locations_places'
 
 exports.up = function (knex, Promise) {
   return knex.schema.createTable(TABLE_NAME, function (table) {
-    table.increments('id').unsigned().primary()
+    table.increments('id').unsigned().notNullable().primary()
     table
       .integer('location_id')
       .references('locations.id')

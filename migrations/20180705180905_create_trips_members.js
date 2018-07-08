@@ -3,7 +3,7 @@
  * https://triphub.gitbook.io/database/trips/db.trips_members
  */
 
-const TABLE_NAME = 'trips_members'
+export const TABLE_NAME = 'trips_members'
 
 exports.up = function (knex, Promise) {
   return knex.schema.createTable('trips_members', function (table) {

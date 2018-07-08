@@ -3,7 +3,7 @@
  * https://triphub.gitbook.io/database/locations/db.travel
  */
 
-const TABLE_NAME = 'locations_travel'
+export const TABLE_NAME = 'locations_travel'
 
 exports.up = function (knex, Promise) {
   const type_values = [
@@ -17,7 +17,7 @@ exports.up = function (knex, Promise) {
   ]
 
   return knex.schema.createTable(TABLE_NAME, function (table) {
-    table.increments('id').unsigned().primary()
+    table.increments('id').unsigned().notNullable().primary()
     table.enu('type', type_values).notNullable().defaultTo('walk')
     table.timestamp('depart_time')
     table.timestamp('arrive_time')
