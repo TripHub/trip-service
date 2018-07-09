@@ -1,11 +1,20 @@
 const moment = require('moment')
-import { Request, Response, NextFunction } from 'express'
+import { Request, Response } from 'express'
 import { NotFoundError } from 'objection'
 
 import { wrapAsync } from '../../utils/async'
 import { getUserTrips } from '../../utils/model/trips'
 // import Trip from '../../models/trip'
+import Trip from '../../models/trip'
+import TripMember from '../../models/trip_member'
 import Invitation from '../../models/invitation'
+
+const isInvitationActive = invitation => {
+  const { is_active, expires_at, claim_count, claim_limit } = invitation
+  return is_active
+    && moment.utc(expires_at) >= moment.utc()
+    && claim_count < claim_limit
+}
 
 /**
  * Get details for a single invitation.
@@ -20,14 +29,6 @@ export const getInvitation = wrapAsync(async (req: Request, res: Response) => {
     .query()
     .findById(iid)
     .throwIfNotFound()
-  // check invitation is active
-  // @ts-ignore
-  const isActive = invitation.is_active
-  // @ts-ignore
-  const isExpired = moment.utc(invitation.expires_at) < moment.utc()
-  if (!isActive || isExpired) {
-    res.status(403).json({ message: 'Invitation has expired.' })
-  }
   // return the invitation
   return res.json(invitation)
 })
@@ -72,7 +73,7 @@ export const createInvitation = wrapAsync(async (req: Request, res: Response) =>
       // @ts-ignore
       created_by: req.user.sub,
       trip_id: trip.$id(),
-      is_active: true,
+      role: req.body.role || 'member',
       expires_at: moment.utc().add(2, 'days').toISOString(),
     })
   res.status(201).json(invitation)
@@ -105,4 +106,64 @@ export const updateInvitation = wrapAsync(async (req: Request, res: Response) =>
     .patch({ is_active })
     .returning('*')
   res.json(patchedInvitation)
+})
+
+/**
+ * Accept an invitation, adding the requesting user to that trip's member list.
+ * 
+ * POST /invitations/:iid
+ * 
+ */
+export const rsvpInvitation = wrapAsync(async (req: Request, res: Response) => {
+  // get invitation id
+  const { iid } = req.params
+  // get the action
+  const { action } = req.body
+  // get the user id
+  const { sub } = req.user
+  // check we have the accept action
+  if (action !== 'accept') {
+    res.status(400).json({ message: '`action` must be set to `accept`.' })
+  }
+  // get the invitation
+  const invitation = await Invitation
+    .query()
+    .findById(iid)
+    .throwIfNotFound()
+  // check within expiry
+  if (!isInvitationActive(invitation)) {
+    return res.status(403).json({ message: 'Invitation has expired.' })
+  }
+  // check the invitation's trip exists
+  const trip = await Trip
+    .query()
+    // @ts-ignore
+    .findById(invitation.trip_id)
+  if (!trip) {
+    return res.status(400).json({ message: 'Related trip no longer exists.' })
+  }
+  // check member does not exist already
+  const existingMember = await TripMember
+    .query()
+    // @ts-ignore
+    .findById([trip.$id(), sub])
+  if (!!existingMember) {
+    // allow for idempotent requests
+    return res.sendStatus(204)
+  }
+  // user has not already been added... add user to trip's members
+  const member = await TripMember
+    .query()
+    .insert({
+      // @ts-ignore
+      trip_id: trip.$id(),
+      user_id: sub,
+      // @ts-ignore
+      role: invitation.role,
+    })
+  // increment invitation's claim count
+  await invitation
+    .$query()
+    .increment('claim_count', 1)
+  return res.sendStatus(204)
 })
