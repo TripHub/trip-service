@@ -1,8 +1,8 @@
 ---
-description: API documentation for the Trip service.
+description: The trip service is responsible for managing trips and their members, locations and places (semi-monolith).
 ---
 
-# Trip Service
+View on [GitHub](https://github.com/TripHub/trip-service).
 
 ## Authorisation
 
@@ -13,6 +13,3 @@ Authorisation is achieved by including an authorisation header, set to a JSON We
 ```text
 Authorization: Bearer <JWT>
 ```
-
-
-

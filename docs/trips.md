@@ -239,6 +239,3 @@ Trip ID.
 {% endapi-method-response %}
 {% endapi-method-spec %}
 {% endapi-method %}
-
-
-
